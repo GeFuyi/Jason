@@ -1,6 +1,6 @@
 package com.egg.springboot_egg.controller;
 
-import com.egg.springboot_egg.GlobalExceptionHandler.Result;
+import com.egg.springboot_egg.config.GlobalExceptionHandler.Result;
 import com.egg.springboot_egg.entity.ChatMessage;
 import com.egg.springboot_egg.service.ChatMessageService;
 import com.egg.springboot_egg.config.aspectandeventlistener.WebSocketEventListener;

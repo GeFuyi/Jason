@@ -1,9 +1,6 @@
 package com.egg.springboot_egg.config.shrioandjwt;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.egg.springboot_egg.GlobalExceptionHandler.BusinessException;
 import com.egg.springboot_egg.entity.User;
-import com.egg.springboot_egg.mapper.UserMapper;
 import com.egg.springboot_egg.service.impl.UserServiceImpl;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
@@ -12,8 +9,6 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class JwtRealm extends AuthorizingRealm {

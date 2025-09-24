@@ -1,6 +1,6 @@
 package com.egg.springboot_egg.service.impl;
 
-import com.egg.springboot_egg.GlobalExceptionHandler.BusinessException;
+import com.egg.springboot_egg.config.GlobalExceptionHandler.BusinessException;
 import com.egg.springboot_egg.entity.ChatMessage;
 import com.egg.springboot_egg.mapper.ChatMessageMapper;
 import com.egg.springboot_egg.service.ChatMessageService;

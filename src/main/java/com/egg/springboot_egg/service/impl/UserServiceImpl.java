@@ -2,7 +2,7 @@ package com.egg.springboot_egg.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.egg.springboot_egg.GlobalExceptionHandler.BusinessException;
+import com.egg.springboot_egg.config.GlobalExceptionHandler.BusinessException;
 import com.egg.springboot_egg.config.shrioandjwt.JwtUtil;
 import com.egg.springboot_egg.entity.User;
 import com.egg.springboot_egg.mapper.UserMapper;

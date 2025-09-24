@@ -1,11 +1,10 @@
 package com.egg.springboot_egg.controller;
 
 
-import com.egg.springboot_egg.GlobalExceptionHandler.Result;
+import com.egg.springboot_egg.config.GlobalExceptionHandler.Result;
 import com.egg.springboot_egg.entity.User;
 import com.egg.springboot_egg.service.UserService;
 import com.egg.springboot_egg.service.upclass.UserQueryService;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;

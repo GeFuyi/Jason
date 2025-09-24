@@ -1,4 +1,4 @@
-package com.egg.springboot_egg.GlobalExceptionHandler;
+package com.egg.springboot_egg.config.GlobalExceptionHandler;
 
 
 import org.apache.shiro.authz.AuthorizationException;

@@ -1,4 +1,4 @@
-package com.egg.springboot_egg.GlobalExceptionHandler;
+package com.egg.springboot_egg.config.GlobalExceptionHandler;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

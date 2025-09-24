@@ -1,4 +1,4 @@
-package com.egg.springboot_egg.GlobalExceptionHandler;
+package com.egg.springboot_egg.config.GlobalExceptionHandler;
 
 /**
  * 自定义业务异常
