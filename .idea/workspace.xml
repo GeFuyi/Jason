@@ -49,7 +49,7 @@
     "Spring Boot.SpringbootEggApplication.executor": "Run",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Final/springboot_egg/src/main/resources/mapper",
+    "last_opened_file_path": "D:/Final/springboot_egg/eggfrontend/jsconfig.json",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -78,8 +78,11 @@
       <recent name="D:\Final\springboot_egg\src\main\resources\mapper" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Final\springboot_egg\src\main\resources" />
-      <recent name="D:\Final\springboot_egg\src\main\resources\mapper" />
+      <recent name="D:\Final\springboot_egg\src\test" />
+      <recent name="D:\Final\springboot_egg\src" />
+      <recent name="D:\Final\springboot_egg" />
+      <recent name="D:\Final\springboot_egg\eggbackend\src\main" />
+      <recent name="D:\Final\springboot_egg\eggbackend" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="com.egg.springboot_egg.config" />
@@ -104,7 +107,7 @@
       </method>
     </configuration>
     <configuration name="serve" type="js.build_tools.npm" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/egg-web/package.json" />
+      <package-json value="$PROJECT_DIR$/eggfrontend/package.json" />
       <command value="run" />
       <scripts>
         <script value="serve" />
@@ -116,7 +119,7 @@
     <list>
       <item itemvalue="npm.serve" />
       <item itemvalue="Spring Boot.SpringbootEggApplication" />
-      <item itemvalue="应用程序.CodeGenerator" />
+      <item itemvalue="Application.CodeGenerator" />
     </list>
   </component>
   <component name="SharedIndexes">
@@ -146,6 +149,8 @@
       <workItem from="1758432328220" duration="369000" />
       <workItem from="1758433078987" duration="248000" />
       <workItem from="1758443811622" duration="35796000" />
+      <workItem from="1758816972837" duration="239000" />
+      <workItem from="1759407173054" duration="2361000" />
     </task>
     <servers />
   </component>
@@ -160,10 +165,15 @@
           <line>15</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/egg/springboot_egg/SpringbootEggApplication.java</url>
+          <line>15</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/com/egg/springboot_egg/SpringbootEggApplication.java</url>
           <line>14</line>
-          <properties class="com.egg.springboot_egg.SpringbootEggApplication" method="main">
+          <properties class="com.egg.springboot_egg.SpringbootEggApplication">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
@@ -176,7 +186,6 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/egg-web/src/user/UserList.vue</url>
           <line>100</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
