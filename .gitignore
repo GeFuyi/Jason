@@ -1,13 +1,30 @@
-# 前端依赖和构建产物
+# ========================
+# 前端 (Vue)
+# ========================
+# node_modules 不上传
 eggfrontend/node_modules/
+# 构建产物 dist 不上传
 eggfrontend/dist/
-
-# 后端构建产物
-target/
-
-# 日志文件
+# 前端日志文件
 *.log
 
-# IntelliJ IDEA 配置文件
-.idea/
+# ========================
+# 后端 (Spring Boot)
+# ========================
+# Maven 构建产物 target 不上传
+target/
+# 后端日志文件
+*.log
+
+# ========================
+# IDE & 系统文件
+# ========================
+# IntelliJ IDEA
 *.iml
+.idea/
+out/
+# VSCode
+.vscode/
+# Windows / macOS 系统文件
+Thumbs.db
+.DS_Store
