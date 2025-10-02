@@ -1,7 +1,7 @@
 server:
   port: 8090
   servlet:
-    context-path: /    # 根路径，方便 Swagger 自动识别 Base URL
+    context-path: /
 
 spring:
   datasource:
@@ -40,9 +40,8 @@ logging:
   level:
     com.egg.springboot_egg: INFO
 
-# Swagger 配置（Springfox）
 springfox:
   documentation:
     swagger:
       v2:
-        path: /v2/api-docs   # 指定 Swagger JSON 文档路径
+        path: /v2/api-docs

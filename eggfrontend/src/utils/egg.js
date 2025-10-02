@@ -3,7 +3,8 @@ import { ElMessage } from 'element-plus'
 
 // 创建 axios 实例
 const egg = axios.create({
-    baseURL: 'http://localhost:8090',
+    // baseURL: 'http://localhost:8090',
+    baseURL: `http://${window.location.hostname}:8090`,
     timeout: 10000
 })
 

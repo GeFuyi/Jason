@@ -37,7 +37,8 @@ public class JwtFilter extends AccessControlFilter {
 //        printRawHttpRequest(httpRequest);
 
         // =================== CORS 头 ===================
-        httpResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
+//        httpResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
+        httpResponse.setHeader("Access-Control-Allow-Origin", httpRequest.getHeader("Origin"));
         httpResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
         httpResponse.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type");
         httpResponse.setHeader("Access-Control-Allow-Credentials", "true");

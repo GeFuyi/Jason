@@ -70,4 +70,5 @@ public interface UserService extends IService<User> {
 //    List<String> getPasswordList();
     List<Integer> getAgeList();
     List<Integer> getGenderList();
+    User findByUsername(String username);
 }

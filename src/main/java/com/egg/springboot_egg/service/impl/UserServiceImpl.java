@@ -103,6 +103,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         Map<String, Object> result = new HashMap<>();
         result.put("userId", user.getId());
+        result.put("username", user.getUsername());
         result.put("token", token);
         result.put("message", "登录成功");
         return result;
@@ -253,6 +254,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 可选字段默认值处理
         if (user.getAge() == null) user.setAge(18);
         if (user.getGender() == null) user.setGender(1);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userMapper.selectOne(new QueryWrapper<User>().eq("username", username));
     }
 
 }

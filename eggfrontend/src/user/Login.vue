@@ -43,6 +43,7 @@ export default {
         // 成功后处理 token
         if (res.token) localStorage.setItem('token', res.token)
         if (res.userId) sessionStorage.setItem('userId', res.userId)
+        if (res.username) sessionStorage.setItem('username', res.username)
 
         this.$message.success(res.message || '登录成功')
         this.$router.push('/chatroom')

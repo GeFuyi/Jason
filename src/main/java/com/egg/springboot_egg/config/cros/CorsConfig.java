@@ -13,8 +13,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 // 允许携带 Cookie
                 .allowCredentials(true)
                 // 指定允许访问的前端地址（必须指定具体域名，不能用 "*"）
-                .allowedOriginPatterns("http://localhost:8080")
-//                .allowedOriginPatterns("*")
+//                .allowedOriginPatterns("http://localhost:8080")
+                .allowedOriginPatterns("*")
                 // 允许的请求方法
 //                .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")

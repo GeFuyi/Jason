@@ -33,23 +33,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setUserDestinationPrefix("/user");
     }
 
-    // ✅ 给每个 session 设置 Principal
-//    @Override
-//    public void configureClientInboundChannel(ChannelRegistration registration) {
-//        registration.interceptors(new ChannelInterceptor() {
-//            @Override
-//            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-//                StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-//                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-//                    String userId = accessor.getFirstNativeHeader("userId");
-//                    System.out.println("[WebSocketConfig] 绑定 Principal userId=" + userId);
-//                    accessor.setUser(() -> userId); // Principal 名称就是 userId
-//                }
-//                return message;
-//            }
-//        });
-//    }
-
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
@@ -59,27 +42,26 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String token = accessor.getFirstNativeHeader("Authorization");
-                    String userId = accessor.getFirstNativeHeader("userId");
+                    String username = accessor.getFirstNativeHeader("username");
 
-                    System.out.println("[WebSocketConfig] CONNECT headers: userId=" + userId + ", Authorization=" + token);
+                    System.out.println("[WebSocketConfig] CONNECT headers: username=" + username + ", Authorization=" + token);
 
                     if (token == null || !token.startsWith("Bearer ")) {
                         throw new IllegalArgumentException("缺少或非法 JWT");
                     }
-
                     token = token.substring(7);
 
                     try {
-                        Claims claims = JwtUtil.parseToken(token); // 解析 JWT
-                        String tokenUserId = claims.getSubject();
+                        Claims claims = JwtUtil.parseToken(token);
+                        String tokenUsername = claims.getSubject();
 
-                        if (!tokenUserId.equals(userId)) {
-                            throw new IllegalArgumentException("JWT 与 userId 不匹配");
+                        if (!tokenUsername.equals(username)) {
+                            throw new IllegalArgumentException("JWT 与 username 不匹配");
                         }
 
                         // JWT 校验通过，绑定 Principal
-                        accessor.setUser(() -> userId);
-                        System.out.println("[WebSocketConfig] JWT 验证通过，绑定 Principal userId=" + userId);
+                        accessor.setUser(() -> username);
+                        System.out.println("[WebSocketConfig] JWT 验证通过，绑定 Principal username=" + username);
 
                     } catch (Exception e) {
                         System.out.println("[WebSocketConfig] JWT 无效: " + e.getMessage());
@@ -91,5 +73,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             }
         });
     }
-
 }

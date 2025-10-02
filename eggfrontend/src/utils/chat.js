@@ -6,18 +6,22 @@ let isConnected = false
 let reconnectTimeout = null
 let pendingMessages = [] // 掉线期间未发送的消息缓存
 
-export function connect(userId, onMessageReceived) {
-    console.log('[chat.js] 开始连接 STOMP，userId=', userId)
+/**
+ * 连接 STOMP WebSocket
+ * @param {string} username 用户名
+ * @param {function} onMessageReceived 收到消息回调
+ */
+export function connect(username, onMessageReceived) {
+    console.log('[chat.js] 开始连接 STOMP，username=', username)
 
-    const socket = new SockJS('http://localhost:8090/ws-chat')
-
+    const socket = new SockJS(`http://${window.location.hostname}:8090/ws-chat`)
     const token = localStorage.getItem('token')  // 从本地取 token
 
     stompClient = new Client({
         webSocketFactory: () => socket,
         connectHeaders: {
-            userId: String(userId),
-            Authorization: token ? 'Bearer ' + token : ''   // ✅ 加上 JWT
+            username: username,       // header 名称改为 username
+            Authorization: token ? 'Bearer ' + token : ''
         },
         debug: str => console.log('[STOMP DEBUG]', str),
         reconnectDelay: 0
@@ -35,14 +39,22 @@ export function connect(userId, onMessageReceived) {
         })
 
         // 订阅私聊
-        stompClient.subscribe(`/topic/private-${userId}`, msg => {
+        stompClient.subscribe(`/topic/private-${username}`, msg => {
             const message = JSON.parse(msg.body)
             console.log('[STOMP] 收到私聊消息:', message)
             onMessageReceived(message)
         })
 
-        console.log('[chat.js] 已订阅: /topic/group 和 /topic/private-' + userId)
+        // ✅ 订阅在线用户
+        stompClient.subscribe('/topic/online-users', msg => {
+            const onlineList = JSON.parse(msg.body)  // array of usernames
+            console.log('[STOMP] 在线用户更新:', onlineList)
+            if (typeof window.updateOnlineUsers === 'function') {
+                window.updateOnlineUsers(onlineList)
+            }
+        })
 
+        console.log('[chat.js] 已订阅: /topic/group 和 /topic/private-' + username)
         flushPendingMessages()
     }
 
@@ -59,15 +71,22 @@ export function connect(userId, onMessageReceived) {
         if (reconnectTimeout) clearTimeout(reconnectTimeout)
         reconnectTimeout = setTimeout(() => {
             console.log('[STOMP] 尝试重连...')
-            connect(userId, onMessageReceived)
+            connect(username, onMessageReceived)
         }, 3000)
     }
 
     stompClient.activate()
 }
 
-export function sendMessage(fromUserId, toUserId, content, tempId) {
-    const payload = { fromUserId, toUserId, content, tempId }
+/**
+ * 发送消息
+ * @param {string} fromUsername 发送者用户名
+ * @param {string} toUsername 接收者用户名
+ * @param {string} content 消息内容
+ * @param {string} tempId 临时 ID
+ */
+export function sendMessage(fromUsername, toUsername, content, tempId) {
+    const payload = { fromUsername, toUsername, content, tempId }
     console.log('[chat.js] 准备发送消息 payload:', payload)
 
     if (!stompClient || !isConnected) {
@@ -83,6 +102,9 @@ export function sendMessage(fromUserId, toUserId, content, tempId) {
     console.log('[chat.js] 消息已发送:', payload)
 }
 
+/**
+ * 发送缓存消息
+ */
 function flushPendingMessages() {
     if (!pendingMessages.length || !stompClient || !isConnected) return
     console.log('[chat.js] 发送缓存消息', pendingMessages.length)
@@ -98,6 +120,9 @@ function flushPendingMessages() {
 
 export function isStompConnected() { return isConnected }
 
+/**
+ * 断开连接
+ */
 export function disconnect() {
     if (stompClient) {
         stompClient.deactivate()

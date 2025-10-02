@@ -11,7 +11,7 @@
           <!-- 群聊 -->
           <div
               class="user-item"
-              :class="{ active: selectedUserId === null }"
+              :class="{ active: selectedUsername === null }"
               @click="selectUser(null)"
           >
             群聊
@@ -22,9 +22,9 @@
           <div
               class="user-item"
               v-for="user in users"
-              :key="user.id"
-              :class="{ active: selectedUserId === user.id }"
-              @click="selectUser(user.id)"
+              :key="user.username"
+              :class="{ active: selectedUsername === user.username }"
+              @click="selectUser(user.username)"
           >
             {{ user.username }}
             <span class="status-dot" :class="user.online ? 'online' : 'offline'"></span>
@@ -39,10 +39,10 @@
         <div
             v-for="msg in filteredMessages"
             :key="msg.id || msg.tempId"
-            :class="['message', msg.fromUserId === Number(userId) ? 'mine' : 'other']"
+            :class="['message', msg.fromUsername === this.username ? 'mine' : 'other']"
         >
           <span class="from">
-            {{ msg.fromUserId === Number(userId) ? '我' : getUsername(msg.fromUserId) }}
+            {{ msg.fromUsername === this.username ? '我' : msg.fromUsername }}
           </span>
           <div class="bubble">
             <span class="content">{{ msg.content }}</span>
@@ -75,9 +75,9 @@ export default {
   name: 'ChatRoom',
   data() {
     return {
-      userId: null,
+      username: null,
       users: [],
-      selectedUserId: null,
+      selectedUsername: null,
       messages: [],
       inputMessage: ''
     }
@@ -86,62 +86,77 @@ export default {
     filteredMessages() {
       return this.messages
           .filter(msg => {
-            if (this.selectedUserId === null) return !msg.toUserId
+            if (this.selectedUsername === null) return !msg.toUsername
             return (
-                (msg.fromUserId === this.selectedUserId && msg.toUserId === Number(this.userId)) ||
-                (msg.fromUserId === Number(this.userId) && msg.toUserId === this.selectedUserId)
+                (msg.fromUsername === this.selectedUsername && msg.toUsername === this.username) ||
+                (msg.fromUsername === this.username && msg.toUsername === this.selectedUsername)
             )
           })
           .sort((a, b) => new Date(a.createTime) - new Date(b.createTime))
     }
   },
   async mounted() {
-    this.userId = Number(sessionStorage.getItem('userId'))
-    if (!this.userId) {
+    this.username = sessionStorage.getItem('username')
+    if (!this.username) {
       ElMessage.error('请先登录')
       this.$router.push('/login')
       return
     }
 
-    // 拉取用户列表和在线状态
+    // 1️⃣ 拉取用户列表
     const usersRes = await egg.get('/user')
     this.users = usersRes.map(u => ({ ...u, online: false }))
 
-    const onlineRes = await egg.get('/user/online')
-    const onlineSet = new Set(onlineRes.map(id => Number(id)))
+    // 2️⃣ 拉取当前在线用户列表，初始化 online 状态
+    const onlineRes = await egg.get('/user/online') // 返回 ["user1", "user2", ...]
+    const onlineSet = new Set(onlineRes)
     this.users.forEach(u => {
-      u.online = u.id === this.userId || onlineSet.has(u.id)
+      u.online = onlineSet.has(u.username)
     })
 
-    // 加载本地缓存（仅私聊消息）
-    this.loadMessagesFromLocal()
+    // 3️⃣ 保证自己永远 online
+    const self = this.users.find(u => u.username === this.username)
+    if (self) self.online = true
 
-    // 拉取群聊消息
+    // 4️⃣ 注册全局回调，WebSocket 推送更新在线列表
+    window.updateOnlineUsers = this.updateOnlineUsersList
+
+    // 5️⃣ 拉取历史消息
+    this.loadMessagesFromLocal()
     const groupRes = await egg.get('/chat/group-msg')
     this.mergeMessages(groupRes)
-
-    // 拉取私聊离线消息
-    const offlineRes = await egg.get('/user/offline-msg', { params: { userId: this.userId } })
+    const offlineRes = await egg.get('/user/offline-msg', { params: { username: this.username } })
     this.mergeMessages(offlineRes)
-
-    // 保存私聊消息到 localStorage
     this.saveMessagesToLocal()
 
-    // 连接 WebSocket
-    connect(this.userId, this.onMessageReceived)
+    // 6️⃣ 连接 WebSocket
+    connect(this.username, this.onMessageReceived)
 
+    // 7️⃣ 滚动到底部
     this.scrollToBottom()
   },
+
+
   methods: {
+
+    updateOnlineUsersList(onlineList) {
+      const onlineSet = new Set(onlineList.map(u => String(u)))
+
+      this.users.forEach(u => {
+        if (u.username === this.username) return // 自己永远在线
+        u.online = onlineSet.has(String(u.username))
+      })
+    },
+
     getStorageKey() {
-      return `chat_messages_user_${this.userId}`
+      return `chat_messages_user_${this.username}`
     },
 
     saveMessagesToLocal() {
       const grouped = {}
       this.messages.forEach(msg => {
-        if (!msg.toUserId) return // 群聊不存
-        const sessionId = msg.fromUserId === this.userId ? msg.toUserId : msg.fromUserId
+        if (!msg.toUsername) return // 群聊不存
+        const sessionId = msg.fromUsername === this.username ? msg.toUsername : msg.fromUsername
         if (!grouped[sessionId]) grouped[sessionId] = []
         if (!grouped[sessionId].some(m => (m.id && m.id === msg.id) || (m.tempId && m.tempId === msg.tempId))) {
           grouped[sessionId].push(msg)
@@ -171,14 +186,14 @@ export default {
             ? `id_${msg.id}`
             : msg.tempId
                 ? `temp_${msg.tempId}`
-                : `key_${msg.fromUserId}_${msg.toUserId || 'group'}_${msg.content}`
+                : `key_${msg.fromUsername}_${msg.toUsername || 'group'}_${msg.content}`
 
         const exists = this.messages.find(m => {
           const mKey = m.id
               ? `id_${m.id}`
               : m.tempId
                   ? `temp_${m.tempId}`
-                  : `key_${m.fromUserId}_${m.toUserId || 'group'}_${m.content}`
+                  : `key_${m.fromUsername}_${m.toUsername || 'group'}_${m.content}`
           return mKey === key
         })
 
@@ -204,7 +219,7 @@ export default {
       )
       if (!exists) {
         this.messages.push(msg)
-        if (msg.toUserId) this.saveMessagesToLocal() // 私聊才存
+        if (msg.toUsername) this.saveMessagesToLocal() // 私聊才存
         this.scrollToBottom()
       }
     },
@@ -219,12 +234,12 @@ export default {
       } else {
         this.messages.push(msg)
       }
-      if (msg.toUserId) this.saveMessagesToLocal()
+      if (msg.toUsername) this.saveMessagesToLocal()
       this.scrollToBottom()
     },
 
-    selectUser(userId) {
-      this.selectedUserId = userId
+    selectUser(username) {
+      this.selectedUsername = username
       this.scrollToBottom()
     },
 
@@ -234,44 +249,37 @@ export default {
 
       const tempId = Date.now() + '_' + Math.random().toString(16).slice(2)
       const payload = {
-        fromUserId: this.userId,
-        toUserId: this.selectedUserId,
+        fromUsername: this.username,
+        toUsername: this.selectedUsername,
         content,
         tempId,
         createTime: new Date().toISOString()
       }
 
-      const isSelfMessage = payload.toUserId === this.userId
-      const isGroupMessage = payload.toUserId === null && payload.fromUserId === this.userId
+      const isSelfMessage = payload.toUsername === this.username
+      const isGroupMessage = payload.toUsername === null && payload.fromUsername === this.username
 
       if (!isSelfMessage && !isGroupMessage) {
         this.pushMessageLocally(payload)
       }
 
       this.inputMessage = ''
-      sendMessage(payload.fromUserId, payload.toUserId, payload.content, tempId)
+      sendMessage(payload.fromUsername, payload.toUsername, payload.content, tempId)
     },
 
     formatTime(datetime) {
       return datetime ? new Date(datetime).toLocaleTimeString() : ''
-    },
-
-    getUsername(id) {
-      const user = this.users.find(u => u.id === id)
-      return user ? user.username : '未知'
     }
   }
 }
 </script>
 
 <style scoped>
-/* 样式保持原样 */
 .chat-container {
   display: flex;
   height: 100vh;
   width: 100vw;
 }
-/* 左侧用户列表 */
 .user-list { width: 20%; display: flex; flex-direction: column; padding: 10px; background-color: #fafafa; box-sizing: border-box; height: 100%; }
 .user-card { display: flex; flex-direction: column; flex: 1; height: 100%; }
 .user-scroll { flex: 1; overflow-y: auto; margin-top: 10px; }
@@ -280,7 +288,6 @@ export default {
 .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .status-dot.online { background-color: #52c41a; }
 .status-dot.offline { background-color: #f5222d; }
-/* 右侧聊天区 */
 .chat-main { width: 80%; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; background-color: #f0f2f5; height: 100%; }
 .messages { flex: 1; overflow-y: auto; padding: 10px; background-color: #ffffff; border-radius: 8px; display: flex; flex-direction: column; gap: 10px; }
 .input-area { display: flex; gap: 10px; padding-top: 10px; height: 50px; border-top: 1px solid #ddd; }
